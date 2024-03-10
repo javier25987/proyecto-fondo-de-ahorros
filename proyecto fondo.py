@@ -25,4 +25,7 @@ class primera_ventana(tk.Tk, Funciones):
         self.label = tk.Label(self, text=f'{str(n)}')
         self.label.pack()
 
+        self.button_crear_socio = tk.Button(self, text='crear socio', command=self.funcion_1)
+        self.button_crear_socio.pack()
+
 primera_ventana().mainloop()
