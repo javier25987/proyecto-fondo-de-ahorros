@@ -2,6 +2,8 @@
 import tkinter as tk 
 import tkinter.messagebox as tkm
 import tkinter.simpledialog as tks
+import sqlite3 as sql
+import datetime as dt
 #============================================================================= ajustes del programa
 tipo_b = 'calibri 15'
 tipo_l = 'calibri 12'
@@ -16,11 +18,27 @@ pagina_en_actualizacion = 'fondo de ahorro, esperando nuevas actualizaciones'
 
 def rectify(s):
     try:
-        float(s)
+        int(s)
         return True
     except ValueError:
         return False
     
+def crear_base_de_datos():
+    nombre = 'FONDO_'
+    with open('DatosImportantes.txt', 'r') as file:
+        lineas = file.readlines()
+        lineas[0] = lineas[0].strip()
+    
+    nombre = nombre + lineas[0] + '_' + dt.datetime.now().strftime('%Y') + '.db'
+    
+    base = sql.connect(nombre)
+    base.commit()
+    base.close()
+
+    with open('DatosImportantes.txt', 'w') as file:
+        new_t = str(int(lineas[0]) + 1) + '\n' + nombre
+        file.write(str(int(lineas[0]) + 1) + '\n' + nombre)
+
 def preguntar_la_clave():
     global clave_de_acceso
 
@@ -42,8 +60,7 @@ clave de acceso para acceder a ellos, por favor digite la clave de acceso'''
         tkm.showwarning('error', 'la contraseña no es correcta')
     
     return status
-    
-    
+
 class Funciones():
     def __init__(self):
         pass
@@ -100,14 +117,17 @@ class menu_de_opciones(tk.Tk, Funciones):
         self.button_pago_cuotas = tk.Button(self, text='pago de cuotas', command=self.pagodecuotas, font=tipo_b)
         self.button_pago_cuotas.pack()
 
-        self.button_ajustes = tk.Button(self, text='prestamos', command=self.prestamosasocios, font=tipo_b)
-        self.button_ajustes.pack()
+        self.button_prestamos = tk.Button(self, text='prestamos', command=self.prestamosasocios, font=tipo_b)
+        self.button_prestamos.pack()
 
-        self.button_ajustes = tk.Button(self, text='modificar socios', command=self.modificarsocios, font=tipo_b)
-        self.button_ajustes.pack()
+        self.button_modificar_socios = tk.Button(self, text='modificar socios', command=self.modificarsocios, font=tipo_b)
+        self.button_modificar_socios.pack()
 
         self.button_ajustes = tk.Button(self, text='ajustes', command=self.ajustesdelprograma, font=tipo_b)
         self.button_ajustes.pack()
+
+        self.button_crear = tk.Button(self, text='crear base de datos', command=crear_base_de_datos, font=tipo_b)
+        self.button_crear.pack()
 
         self.label_version = tk.Label(self, text='version 0,0,0')
         self.label_version.place(relx=0, rely=0.975)
