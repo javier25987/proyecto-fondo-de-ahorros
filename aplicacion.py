@@ -4,15 +4,40 @@ import tkinter.messagebox as tkm
 import tkinter.simpledialog as tks
 import sqlite3 as sql
 import datetime as dt
+import os
+
 #============================================================================= ajustes del programa
+ejecutar_programa = False
+try:
+    with open('DatosImportantes.txt', 'r') as f:
+        contenido = f.readlines()
+
+    if len(contenido) != 2:
+        tkm.showerror('Error', 'el formato no es\nel de un archivo de\ncontrol reconocido') 
+    else:
+        try:
+            int(contenido[0].strip())
+            s = contenido[1].strip()
+            if s[:6] == 'FONDO_' and s[-3:] == '.db': #se puede pedir confirmacion por la cifra dada
+                try:
+                    open(s)
+                    nombre_bd = contenido[1]
+                    nombre_negocio = 'fondo san javier'
+                    clave_de_acceso = '1234'
+                    ejecutar_programa = True
+                except:
+                    tkm.showerror('Error', 'base de datos no encontrada')
+            else:
+                tkm.showerror('Error', 'el formato no es\nel de un archivo de\ncontrol reconocido')
+        except:
+            tkm.showerror('Error', 'el formato no es\nel de un archivo de\ncontrol reconocido') 
+except:   
+    tkm.showerror('Error', 'no se encuentra el\narchivo de control')
+ 
 tipo_b = 'calibri 15'
 tipo_l = 'calibri 12'
 
-nombre_negocio = 'fondo san javier'
-
-clave_de_acceso = '1234'
-
-pagina_en_actualizacion = 'fondo de ahorro, esperando nuevas actualizaciones'
+pagina_en_actualizacion = f'fondo de ahorro, esperando nuevas actualizaciones'
 
 #============================================================================= funciones necesarias
 
@@ -22,22 +47,6 @@ def rectify(s):
         return True
     except ValueError:
         return False
-    
-def crear_base_de_datos():
-    nombre = 'FONDO_'
-    with open('DatosImportantes.txt', 'r') as file:
-        lineas = file.readlines()
-        lineas[0] = lineas[0].strip()
-    
-    nombre = nombre + lineas[0] + '_' + dt.datetime.now().strftime('%Y') + '.db'
-    
-    base = sql.connect(nombre)
-    base.commit()
-    base.close()
-
-    with open('DatosImportantes.txt', 'w') as file:
-        new_t = str(int(lineas[0]) + 1) + '\n' + nombre
-        file.write(str(int(lineas[0]) + 1) + '\n' + nombre)
 
 def preguntar_la_clave():
     global clave_de_acceso
@@ -110,6 +119,7 @@ class menu_de_opciones(tk.Tk, Funciones):
         self.state("zoomed")
 
         self.title('menu')
+        self.iconphoto(False, tk.PhotoImage(file='icono.ico'))
 
         self.label = tk.Label(self, text=pagina_en_actualizacion, font=tipo_l)
         self.label.pack()
@@ -126,10 +136,7 @@ class menu_de_opciones(tk.Tk, Funciones):
         self.button_ajustes = tk.Button(self, text='ajustes', command=self.ajustesdelprograma, font=tipo_b)
         self.button_ajustes.pack()
 
-        self.button_crear = tk.Button(self, text='crear base de datos', command=crear_base_de_datos, font=tipo_b)
-        self.button_crear.pack()
-
-        self.label_version = tk.Label(self, text='version 0,0,0')
+        self.label_version = tk.Label(self, text=f'version 0,0,0     base de datos {nombre_bd}')
         self.label_version.place(relx=0, rely=0.975)
 
 #============================================================ proceso de cuotas
@@ -141,6 +148,7 @@ class pago_de_cuotas(tk.Tk, Funciones):
         self.state("zoomed")
 
         self.title('pago de cuotas')
+        self.iconphoto(False, tk.PhotoImage(file='icono.ico'))
 
         self.label = tk.Label(self, text=pagina_en_actualizacion, font=tipo_l)
         self.label.pack()
@@ -157,6 +165,7 @@ class ajustes_del_programa(tk.Tk, Funciones):
         self.state("zoomed")
 
         self.title('ajustes')
+        self.iconphoto(False, tk.PhotoImage(file='icono.ico'))
 
         self.label = tk.Label(self, text=pagina_en_actualizacion, font=tipo_l)
         self.label.pack()
@@ -173,6 +182,7 @@ class prestamos_a_socios(tk.Tk, Funciones):
         self.state("zoomed")
 
         self.title('prestamos')
+        self.iconphoto(False, tk.PhotoImage(file='icono.ico'))
 
         self.label = tk.Label(self, text=pagina_en_actualizacion, font=tipo_l)
         self.label.pack()
@@ -189,6 +199,7 @@ class modificar_socios(tk.Tk, Funciones):
         self.state("zoomed")
 
         self.title('socios')
+        self.iconphoto(False, tk.PhotoImage(file='icono.ico'))
 
         self.label = tk.Label(self, text=pagina_en_actualizacion, font=tipo_l)
         self.label.pack()
@@ -199,4 +210,5 @@ class modificar_socios(tk.Tk, Funciones):
 #================================================================================== ejecucion final
 
 if __name__ == '__main__':
-    menu_de_opciones().mainloop()
+    if ejecutar_programa:
+        menu_de_opciones().mainloop()
