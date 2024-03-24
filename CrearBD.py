@@ -24,7 +24,13 @@ def insertar_socio(nombre, puestos, nombre_base, n=50):
     
 def crear_base_de_datos():
     nombre = 'FONDO_'
-    with open('DatosImportantes.txt', 'r') as file:
+    try:
+        open('ArchivoControl.txt')
+    except:
+        tkm.showerror('Error', 'no se encuentra el\narchivo de control')
+        return None
+    
+    with open('ArchivoControl.txt', 'r') as file:
         lineas = file.readlines()
         lineas[0] = lineas[0].strip()
     
@@ -72,14 +78,14 @@ def crear_base_de_datos():
 
     insertar_socio('ricardo', 50, nombre)
 
-    with open('DatosImportantes.txt', 'w') as file:
+    with open('ArchivoControl.txt', 'w') as file:
         file.write(str(int(lineas[0]) + 1) + '\n' + nombre)
 
 class root(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        self.geometry('800x300+50+50')
+        self.w_h_screen(w_w = 580, h_w = 420)
         self.title('creacion de la base de datos')
         self.iconphoto(False, tk.PhotoImage(file='icono.ico'))
 
@@ -91,21 +97,50 @@ class root(tk.Tk):
         base ya existente, esto podria comprometer todo el optimo funcionamiento del 
         programa entre tanto la perdida de todo el trabajo realizado y posiblemente
         no se pueda realizar la tabulacion de los datos obtenidos en todo el tiempo
-        de funcionamiento'''
+        de funcionamiento.\n
+        si es la primera vez que crea una base de datos asegurese de haber introducido
+        un archivo de texto llamado "ArchivoControl" con el formato ".txt" a la carpeta
+        y que este solo tenga un "1" escrito en su primera linea, asi la base de datos se
+        creara correctamente, en caso de no haberlo o de de confuciones el boton
+        "crear archivo .txt" resolvera este problema'''
 
         self.label = tk.Label(self, text=text, font='calibri 12')
         self.label.pack()
 
-        self.button = tk.Button(self, text='crear base de datos', font='calibri 15', command=self.crear)
+        self.button = tk.Button(self, text='crear base de datos', font='calibri 15', command=self.crear_bd)
         self.button.pack()
 
-    def crear(self):
+        self.button_arch = tk.Button(self, text='crear archivo .txt', font='calibri 15', command=self.crear_archivo_control)
+        self.button_arch.pack()
+
+    def crear_bd(self):
         pregunta = tkm.askyesno('base de datos', 'desea crear la base de datos?')
         if pregunta == True:
             clave = tks.askinteger('contraseña', 'para continuar por favor\nintroduzca la contraseña')
             if clave == 79842130:
                 crear_base_de_datos()
         self.destroy()
+
+    def crear_archivo_control(self):
+        pregunta = tkm.askyesno('archivo', 'desea crear el archivo de control?')
+        if pregunta == True:
+            clave = tks.askinteger('contraseña', 'para continuar por favor\nintroduzca la contraseña')
+            if clave == 79842130:
+                with open('ArchivoControl.txt', 'w') as f:
+                    f.write('1')
+    
+    def w_h_screen(self, w_w = 600, h_w = 500):
+
+        width_window = w_w
+        height_window = h_w
+
+        width_screen = self.winfo_screenwidth()
+        height_screen = self.winfo_screenheight()
+
+        x = (width_screen - width_window) // 2
+        y = (height_screen - height_window) // 2
+
+        self.geometry(f'{width_window}x{height_window}+{x}+{y}')
 
 if __name__ == '__main__':
     root().mainloop()

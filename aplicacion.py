@@ -3,27 +3,29 @@ import tkinter as tk
 import tkinter.messagebox as tkm
 import tkinter.simpledialog as tks
 import sqlite3 as sql
-import datetime as dt
-import os
-
+import datetime
+import Pfunciones as Pf
 #============================================================================= ajustes del programa
 ejecutar_programa = False
 try:
-    with open('DatosImportantes.txt', 'r') as f:
+    with open('ArchivoControl.txt', 'r') as f:
         contenido = f.readlines()
 
-    if len(contenido) != 2:
-        tkm.showerror('Error', 'el formato no es\nel de un archivo de\ncontrol reconocido') 
+    if contenido == ['1']:
+         tkm.showerror('Error', 'el archivo es correcto\nfalta crear la base de datos')
+    elif len(contenido) != 2:
+        tkm.showerror('Error', 'el formato no es\nel de un archivo de\ncontrol reconocido')
     else:
         try:
-            int(contenido[0].strip())
+            n = int(contenido[0].strip())
             s = contenido[1].strip()
-            if s[:6] == 'FONDO_' and s[-3:] == '.db': #se puede pedir confirmacion por la cifra dada
+            if s[:6] == 'FONDO_' and s[-3:] == '.db' and s[6] == str(n-1): 
                 try:
                     open(s)
                     nombre_bd = contenido[1]
-                    nombre_negocio = 'fondo san javier'
-                    clave_de_acceso = '1234'
+                    nombre_negocio = Pf.leer_ajuste_n(1, nombre_bd)
+                    clave_de_acceso = Pf.leer_ajuste_n(5, nombre_bd)
+                    print(clave_de_acceso)
                     ejecutar_programa = True
                 except:
                     tkm.showerror('Error', 'base de datos no encontrada')
@@ -33,7 +35,7 @@ try:
             tkm.showerror('Error', 'el formato no es\nel de un archivo de\ncontrol reconocido') 
 except:   
     tkm.showerror('Error', 'no se encuentra el\narchivo de control')
- 
+    
 tipo_b = 'calibri 15'
 tipo_l = 'calibri 12'
 
@@ -41,51 +43,9 @@ pagina_en_actualizacion = f'fondo de ahorro, esperando nuevas actualizaciones'
 
 #============================================================================= funciones necesarias
 
-def rectify(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
-
-def preguntar_la_clave():
-    global clave_de_acceso
-
-    status = False
-
-    text = '''los parametros que se pueden modificar en la siguiente ventana repercuten 
-en el optimo funcionamiento del programa, por lo ello se necesita una
-clave de acceso para acceder a ellos, por favor digite la clave de acceso'''
-
-    clave = tks.askstring('contraseña', text,).strip()
-
-    if clave == clave_de_acceso:
-        status = True
-    elif clave == '':
-        tkm.showwarning('error', 'la contraseña no puede estar vacia')
-    elif clave == None:
-        tkm.showwarning('error', 'lo siento no puedes acceder')
-    else:
-        tkm.showwarning('error', 'la contraseña no es correcta')
-    
-    return status
-
 class Funciones():
     def __init__(self):
         pass
-
-    def w_h_screen(self, w_w = 600, h_w = 300):
-
-        width_window = w_w
-        height_window = h_w
-
-        width_screen = self.winfo_screenwidth()
-        height_screen = self.winfo_screenheight()
-
-        x = (width_screen - width_window) // 2
-        y = (height_screen - height_window) // 2
-
-        self.geometry(f'{width_window}x{height_window}+{x}+{y}')
 
     def menudeopciones(self):
         self.destroy()
@@ -96,7 +56,7 @@ class Funciones():
         pago_de_cuotas().mainloop()
 
     def ajustesdelprograma(self):
-        if preguntar_la_clave():
+        if Pf.preguntar_la_clave(clave_p=clave_de_acceso):
             self.destroy()
             ajustes_del_programa().mainloop()
 
@@ -105,7 +65,7 @@ class Funciones():
         prestamos_a_socios().mainloop()
 
     def modificarsocios(self):
-        if preguntar_la_clave():
+        if Pf.preguntar_la_clave(clave_p=clave_de_acceso):
             self.destroy()
             modificar_socios().mainloop()
 
@@ -121,7 +81,7 @@ class menu_de_opciones(tk.Tk, Funciones):
         self.title('menu')
         self.iconphoto(False, tk.PhotoImage(file='icono.ico'))
 
-        self.label = tk.Label(self, text=pagina_en_actualizacion, font=tipo_l)
+        self.label = tk.Label(self, text=nombre_negocio, font='calibri 20')
         self.label.pack()
 
         self.button_pago_cuotas = tk.Button(self, text='pago de cuotas', command=self.pagodecuotas, font=tipo_b)
@@ -136,8 +96,15 @@ class menu_de_opciones(tk.Tk, Funciones):
         self.button_ajustes = tk.Button(self, text='ajustes', command=self.ajustesdelprograma, font=tipo_b)
         self.button_ajustes.pack()
 
-        self.label_version = tk.Label(self, text=f'version 0,0,0     base de datos {nombre_bd}')
+        self.label_version = tk.Label(self, text=f'version: 0,0,0     base de datos: {nombre_bd}')
         self.label_version.place(relx=0, rely=0.975)
+
+        valor = tk.StringVar()
+        valor.set('todas')
+
+        self.drop = tk.OptionMenu(self, valor, 'todas', 'opcion_1', 'opcion_2', 'opcion_3')
+        self.drop.configure(font=tipo_b)
+        self.drop.pack() #ipadx=20, ipady=10
 
 #============================================================ proceso de cuotas
         
