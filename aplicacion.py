@@ -81,30 +81,23 @@ class menu_de_opciones(tk.Tk, Funciones):
         self.title('menu')
         self.iconphoto(False, tk.PhotoImage(file='icono.ico'))
 
-        self.label = tk.Label(self, text=nombre_negocio, font='calibri 20')
-        self.label.pack()
+        self.label = tk.Label(self, text=nombre_negocio, font='serif 50')
+        self.label.pack(pady=70)
 
         self.button_pago_cuotas = tk.Button(self, text='pago de cuotas', command=self.pagodecuotas, font=tipo_b)
-        self.button_pago_cuotas.pack()
+        self.button_pago_cuotas.pack(pady=3)
 
         self.button_prestamos = tk.Button(self, text='prestamos', command=self.prestamosasocios, font=tipo_b)
-        self.button_prestamos.pack()
+        self.button_prestamos.pack(pady=3)
 
         self.button_modificar_socios = tk.Button(self, text='modificar socios', command=self.modificarsocios, font=tipo_b)
-        self.button_modificar_socios.pack()
+        self.button_modificar_socios.pack(pady=3)
 
         self.button_ajustes = tk.Button(self, text='ajustes', command=self.ajustesdelprograma, font=tipo_b)
-        self.button_ajustes.pack()
+        self.button_ajustes.pack(pady=3)
 
         self.label_version = tk.Label(self, text=f'version: 0,0,0     base de datos: {nombre_bd}')
         self.label_version.place(relx=0, rely=0.975)
-
-        valor = tk.StringVar()
-        valor.set('todas')
-
-        self.drop = tk.OptionMenu(self, valor, 'todas', 'opcion_1', 'opcion_2', 'opcion_3')
-        self.drop.configure(font=tipo_b)
-        self.drop.pack() #ipadx=20, ipady=10
 
 #============================================================ proceso de cuotas
         

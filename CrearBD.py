@@ -3,24 +3,15 @@ import tkinter.messagebox as tkm
 import tkinter.simpledialog as tks
 import sqlite3 as sql
 import datetime as dt
+import Pfunciones as Pf
 
-def insertar_ajuste(nombre_ajuste, valor, nombre_base):
-    base = sql.connect(nombre_base)
+def insertar_ajuste(nombre_ajuste, valor, nombre_b):
+    base = sql.connect(nombre_b)
     cursor = base.cursor()
     instruc = f"INSERT INTO ajustes VALUES ('{nombre_ajuste}', '{valor}')"
     cursor.execute(instruc)
     base.commit()
     base.close()
-
-def insertar_socio(nombre, puestos, nombre_base, n=50):
-    base = sql.connect(nombre_base)
-    cursor = base.cursor()
-    basico = 'n'*n
-    instruc = f"INSERT INTO socios VALUES ('{nombre}', {puestos}, '{basico}', '{basico}', '{basico}', 'activo', 0, 0, 0, 0 )"
-    cursor.execute(instruc)
-    base.commit()
-    base.close()
-
     
 def crear_base_de_datos():
     nombre = 'FONDO_'
@@ -56,6 +47,7 @@ def crear_base_de_datos():
     insertar_ajuste('interes por prestamo', 0.03, nombre)
     insertar_ajuste('numero de cuotas', 50, nombre)
     insertar_ajuste('clave de acceso', 1234, nombre)
+    insertar_ajuste('calendario', 'none', nombre)
 
     base = sql.connect(nombre)
     cursor = base.cursor()
@@ -76,7 +68,7 @@ def crear_base_de_datos():
     base.commit()
     base.close()
 
-    insertar_socio('ricardo', 50, nombre)
+    Pf.insertar_socio('ricardo', 50, nombre)
 
     with open('ArchivoControl.txt', 'w') as file:
         file.write(str(int(lineas[0]) + 1) + '\n' + nombre)
@@ -144,4 +136,3 @@ class root(tk.Tk):
 
 if __name__ == '__main__':
     root().mainloop()
-

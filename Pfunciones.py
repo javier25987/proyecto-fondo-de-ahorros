@@ -1,4 +1,3 @@
-import tkinter as tk 
 import tkinter.messagebox as tkm
 import tkinter.simpledialog as tks
 import sqlite3 as sql
@@ -6,10 +5,8 @@ import datetime
 
 def modificar_string(s, elemento, modificador):
     lista_s = [i for i in s]
-    lista_s[elemento-1] = modificador
-    new_s = ''
-    for i in lista_s:
-        new_s += i
+    lista_s[elemento] = modificador
+    new_s = ''.join(lista_s)
     return new_s
 
 def fecha_string_formato(fecha):
@@ -40,10 +37,10 @@ def rectify(s):
     except ValueError:
         return False
 
-def leer_ajuste_n(n, nombre_b):
+def leer_ajuste_n(ajuste_n, nombre_b):
     base = sql.connect(nombre_b)
     cursor = base.cursor()
-    instruc = f"SELECT valor FROM ajustes WHERE rowid = {n}"
+    instruc = f"SELECT valor FROM ajustes WHERE rowid = {ajuste_n}"
     cursor.execute(instruc)
     datos = cursor.fetchall()
     base.commit()
@@ -73,6 +70,115 @@ clave de acceso para acceder a ellos, por favor digite la clave de acceso'''
         tkm.showwarning('error', 'la contraseña no es correcta')
     
     return status
+
+def insertar_socio(nombre, puestos, nombre_b, n=50):
+    base = sql.connect(nombre_b)
+    cursor = base.cursor()
+    basico = 'n'*n
+    multas = '0'*n
+    instruc = f"INSERT INTO socios VALUES ('{nombre}', {puestos}, '{basico}', '{multas}', '{basico}', 'activo', 0, 0, 0, 0 )"
+    cursor.execute(instruc)
+    base.commit()
+    base.close()
+
+def cargar_datos_texto(nombre_b='', usuario=1, tabla='', columna='', nuevo_valor=''):
+    base = sql.connect(nombre_b)
+    cursor = base.cursor()
+    instruc = f"UPDATE {tabla} SET {columna} = '{nuevo_valor}' WHERE rowid = {usuario}"
+    cursor.execute(instruc)
+    base.commit()
+    base.close()
+
+def cargar_datos_numeros(nombre_b='', usuario=1, tabla='', columna='', nuevo_valor=''):
+    base = sql.connect(nombre_b)
+    cursor = base.cursor()
+    instruc = f"UPDATE {tabla} SET {columna} = {nuevo_valor} WHERE rowid = {usuario}"
+    cursor.execute(instruc)
+    base.commit()
+    base.close()
+
+def pagar_cuotas(usuario=1, n=1, nombre_b=''):
+    base = sql.connect(nombre_b)
+    cursor = base.cursor()
+    instruc = f"SELECT cuotas FROM socios WHERE rowid = {usuario}"
+    cursor.execute(instruc)
+    cuota_cursor = cursor.fetchall()[0][0]
+    base.commit()
+    base.close()
+
+    for _ in range(n):
+        posicion = cuota_cursor.find('n')
+        cuota_cursor = modificar_string(cuota_cursor, posicion, 'p')
+
+    cargar_datos_texto(nombre_b=nombre_b, usuario=usuario, tabla='socios', columna='cuotas', nuevo_valor=cuota_cursor)
+
+def sumar_una_multa(usuario=1, semana=1, nombre_b=''):
+    base = sql.connect(nombre_b)
+    cursor = base.cursor()
+    instruc = f"SELECT multas FROM socios WHERE rowid = {usuario}"
+    cursor.execute(instruc)
+    cuota_cursor = cursor.fetchall()[0][0]
+    base.commit()
+    base.close()
+
+    cuota_cursor = [i for i in cuota_cursor]
+    cuota_cursor = list(map(int, cuota_cursor))
+    cuota_cursor[semana-1] = cuota_cursor[semana-1] + 1
+    cuota_cursor = list(map(str, cuota_cursor))
+    cuota_cursor = ''.join(cuota_cursor)
+
+    cargar_datos_texto(nombre_b=nombre_b, usuario=usuario, tabla='socios', columna='multas', nuevo_valor=cuota_cursor)
+
+def pagar_una_multa(usuario=1, nombre_b=''):
+    base = sql.connect(nombre_b)
+    cursor = base.cursor()
+    instruc = f"SELECT multas FROM socios WHERE rowid = {usuario}"
+    cursor.execute(instruc)
+    cuota_cursor = cursor.fetchall()[0][0]
+    base.commit()
+    base.close()
+
+    cuota_cursor = list(map(int, cuota_cursor))
+
+    k = 0
+    for i in cuota_cursor:
+        if i != 0:
+            cuota_cursor[k] = i - 1
+            break
+        k += 1
+
+    cuota_cursor = list(map(str, cuota_cursor))
+    cuota_cursor = ''.join(cuota_cursor)
+
+    cargar_datos_texto(nombre_b=nombre_b, usuario=usuario, tabla='socios', columna='multas', nuevo_valor=cuota_cursor)
+
+def pagar_una_multa(usuario=1, nombre_b=''):
+    base = sql.connect(nombre_b)
+    cursor = base.cursor()
+    instruc = f"SELECT multas FROM socios WHERE rowid = {usuario}"
+    cursor.execute(instruc)
+    cuota_cursor = cursor.fetchall()[0][0]
+    base.commit()
+    base.close()
+
+    value = False
+    cuota_cursor = list(map(int, cuota_cursor))
+
+    k = 0
+    for i in cuota_cursor:
+        if i != 0:
+            cuota_cursor[k] = i - 1
+            value = True
+            break
+        k += 1
+    else:
+        tkm.showwarning('error', 'en teoria es imposible que un usuario\npague cuotas cuando no las debe\ngenial, encontraste un bug')
+
+    cuota_cursor = list(map(str, cuota_cursor))
+    cuota_cursor = ''.join(cuota_cursor)
+
+    if value:
+        cargar_datos_texto(nombre_b=nombre_b, usuario=usuario, tabla='socios', columna='multas', nuevo_valor=cuota_cursor)
 
 if __name__ == '__main__':
     pass
