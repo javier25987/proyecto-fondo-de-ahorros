@@ -73,6 +73,8 @@ def crear_base_de_datos():
     with open('ArchivoControl.txt', 'w') as file:
         file.write(str(int(lineas[0]) + 1) + '\n' + nombre)
 
+    tkm.showinfo('base de datos','la base de datos ha sido creada')
+
 class root(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -111,6 +113,10 @@ class root(tk.Tk):
             clave = tks.askinteger('contraseña', 'para continuar por favor\nintroduzca la contraseña')
             if clave == 79842130:
                 crear_base_de_datos()
+            else:
+                tkm.showwarning('error', 'la contraseña no es correcta')
+        else:
+            tkm.showwarning('error', 'bueno, gracias por intentalo')
         self.destroy()
 
     def crear_archivo_control(self):
@@ -120,6 +126,11 @@ class root(tk.Tk):
             if clave == 79842130:
                 with open('ArchivoControl.txt', 'w') as f:
                     f.write('1')
+                tkm.showinfo('archivo de control','el archivo ha sido creado')
+            else:
+                tkm.showwarning('error', 'la contraseña no es correcta')
+        else:
+            tkm.showwarning('error', 'bueno, gracias por intentalo')
     
     def w_h_screen(self, w_w = 600, h_w = 500):
 

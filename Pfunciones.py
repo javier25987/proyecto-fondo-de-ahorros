@@ -76,6 +76,7 @@ def insertar_socio(nombre, puestos, nombre_b, n=50):
     cursor = base.cursor()
     basico = 'n'*n
     multas = '0'*n
+    nombre = nombre.lower()
     instruc = f"INSERT INTO socios VALUES ('{nombre}', {puestos}, '{basico}', '{multas}', '{basico}', 'activo', 0, 0, 0, 0 )"
     cursor.execute(instruc)
     base.commit()
@@ -107,7 +108,8 @@ def pagar_cuotas(usuario=1, n=1, nombre_b=''):
     base.close()
 
     for _ in range(n):
-        posicion = cuota_cursor.find('n')
+        execute = [i for i in cuota_cursor if i != 'p']
+        posicion = cuota_cursor.find(execute[0])
         cuota_cursor = modificar_string(cuota_cursor, posicion, 'p')
 
     cargar_datos_texto(nombre_b=nombre_b, usuario=usuario, tabla='socios', columna='cuotas', nuevo_valor=cuota_cursor)
@@ -181,4 +183,4 @@ def pagar_una_multa(usuario=1, nombre_b=''):
         cargar_datos_texto(nombre_b=nombre_b, usuario=usuario, tabla='socios', columna='multas', nuevo_valor=cuota_cursor)
 
 if __name__ == '__main__':
-    pass
+    pagar_cuotas(usuario=1,nombre_b='FONDO_1_2024.db')
