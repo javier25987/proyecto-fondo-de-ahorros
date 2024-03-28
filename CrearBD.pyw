@@ -47,7 +47,8 @@ def crear_base_de_datos():
     insertar_ajuste('interes por prestamo', 0.03, nombre)
     insertar_ajuste('numero de cuotas', 50, nombre)
     insertar_ajuste('clave de acceso', 1234, nombre)
-    insertar_ajuste('calendario', 'none', nombre)
+    insertar_ajuste('calendario', 'None', nombre)
+    insertar_ajuste('numero de usuarios', 0, nombre)
 
     base = sql.connect(nombre)
     cursor = base.cursor()
@@ -55,6 +56,7 @@ def crear_base_de_datos():
         '''CREATE TABLE socios(
         nombre text,
         puestos integrer,
+        revisiones integrer,
         cuotas text,
         multas text,
         tesorero text,
@@ -68,7 +70,7 @@ def crear_base_de_datos():
     base.commit()
     base.close()
 
-    Pf.insertar_socio('ricardo', 50, nombre)
+    Pf.insertar_socio('ricaRdo zamorA', 10, nombre)
 
     with open('ArchivoControl.txt', 'w') as file:
         file.write(str(int(lineas[0]) + 1) + '\n' + nombre)
