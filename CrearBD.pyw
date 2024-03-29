@@ -18,7 +18,7 @@ def crear_base_de_datos():
     try:
         open('ArchivoControl.txt')
     except:
-        tkm.showerror('Error', 'no se encuentra el\narchivo de control')
+        tkm.showerror('Error', 'No se encuentra el\narchivo de control.')
         return None
     
     with open('ArchivoControl.txt', 'r') as file:
@@ -49,6 +49,9 @@ def crear_base_de_datos():
     insertar_ajuste('clave de acceso', 1234, nombre)
     insertar_ajuste('calendario', 'None', nombre)
     insertar_ajuste('numero de usuarios', 0, nombre)
+    insertar_ajuste('anular usuarios', 'False', nombre)
+    insertar_ajuste('cobrar multas', 'False', nombre)
+    insertar_ajuste('valor de la cuota', 10000, nombre)
 
     base = sql.connect(nombre)
     cursor = base.cursor()
@@ -75,7 +78,7 @@ def crear_base_de_datos():
     with open('ArchivoControl.txt', 'w') as file:
         file.write(str(int(lineas[0]) + 1) + '\n' + nombre)
 
-    tkm.showinfo('base de datos','la base de datos ha sido creada')
+    tkm.showinfo('Base de datos','La base de datos ha sido creada.')
 
 class root(tk.Tk):
     def __init__(self):
@@ -110,29 +113,29 @@ class root(tk.Tk):
         self.button_arch.pack()
 
     def crear_bd(self):
-        pregunta = tkm.askyesno('base de datos', 'desea crear la base de datos?')
+        pregunta = tkm.askyesno('Base de datos', '¿desea crear la base de datos?')
         if pregunta == True:
-            clave = tks.askinteger('contraseña', 'para continuar por favor\nintroduzca la contraseña')
+            clave = tks.askinteger('Contraseña', 'Para continuar por favor\nintroduzca la contraseña.')
             if clave == 79842130:
                 crear_base_de_datos()
             else:
-                tkm.showwarning('error', 'la contraseña no es correcta')
+                tkm.showwarning('Error', 'la contraseña no es correcta.')
         else:
-            tkm.showwarning('error', 'bueno, gracias por intentalo')
+            tkm.showwarning('Error', 'Bueno, gracias por intentalo.')
         self.destroy()
 
     def crear_archivo_control(self):
-        pregunta = tkm.askyesno('archivo', 'desea crear el archivo de control?')
+        pregunta = tkm.askyesno('Archivo', '¿desea crear el archivo de control?')
         if pregunta == True:
-            clave = tks.askinteger('contraseña', 'para continuar por favor\nintroduzca la contraseña')
+            clave = tks.askinteger('Contraseña', 'Para continuar por favor\nintroduzca la contraseña.')
             if clave == 79842130:
                 with open('ArchivoControl.txt', 'w') as f:
                     f.write('1')
-                tkm.showinfo('archivo de control','el archivo ha sido creado')
+                tkm.showinfo('Archivo de control','El archivo ha sido creado.')
             else:
-                tkm.showwarning('error', 'la contraseña no es correcta')
+                tkm.showwarning('Error', 'La contraseña no es correcta.')
         else:
-            tkm.showwarning('error', 'bueno, gracias por intentalo')
+            tkm.showwarning('Error', 'Bueno, gracias por intentalo.')
     
     def w_h_screen(self, w_w = 600, h_w = 500):
 

@@ -72,15 +72,15 @@ clave de acceso para acceder a ellos, por favor digite la clave de acceso'''
     try:
         clave = clave.strip()
     except:
-        tkm.showwarning('error', 'bueno, gracias por intentalo')
+        tkm.showwarning('Error', 'Bueno, gracias por intentalo.')
         return status
 
     if clave == clave_p:
         status = True
     elif clave == '':
-        tkm.showwarning('error', 'la contraseña no puede estar vacia')
+        tkm.showwarning('Error', 'La contraseña no puede estar vacia.')
     else:
-        tkm.showwarning('error', 'la contraseña no es correcta')
+        tkm.showwarning('Error', 'La contraseña no es correcta.')
     
     return status
 
@@ -100,7 +100,7 @@ def cargar_datos_numeros(nombre_b='', usuario=1, tabla='', columna='', nuevo_val
     base.commit()
     base.close()
 
-def insertar_socio(nombre, puestos, nombre_b, n=50):
+def insertar_socio(nombre='', puestos=1, nombre_b='', n=50):
     base = sql.connect(nombre_b)
     cursor = base.cursor()
     basico = 'n'*n
@@ -119,6 +119,7 @@ def insertar_socio(nombre, puestos, nombre_b, n=50):
     cargar_datos_numeros(nombre_b=nombre_b, usuario=7, tabla='ajustes', columna='valor', nuevo_valor=k)
 
 def pagar_n_cuotas(usuario=1, n=1, nombre_b='', tesorero='1'):
+    tesorero = str(tesorero)
     cuota_cursor= leer_en_socios(usuario_n=usuario, columna='cuotas', nombre_b=nombre_b)
     tesorero_cursor = leer_en_socios(usuario_n=usuario, columna='tesorero', nombre_b=nombre_b)
 
@@ -132,16 +133,8 @@ def pagar_n_cuotas(usuario=1, n=1, nombre_b='', tesorero='1'):
     cargar_datos_texto(nombre_b=nombre_b, usuario=usuario, tabla='socios', columna='tesorero', nuevo_valor=tesorero_cursor)
 
 def sumar_una_multa(usuario=1, semana=1, nombre_b=''):
-    base = sql.connect(nombre_b)
-    cursor = base.cursor()
-    instruc = f"SELECT multas FROM socios WHERE rowid = {usuario}"
-    cursor.execute(instruc)
-    cuota_cursor = cursor.fetchall()[0][0]
-    base.commit()
-    base.close()
+    cuota_cursor = [int(i) for i in leer_en_socios(usuario_n=usuario, columna='multas', nombre_b=nombre_b)]
 
-    cuota_cursor = [i for i in cuota_cursor]
-    cuota_cursor = list(map(int, cuota_cursor))
     cuota_cursor[semana] = cuota_cursor[semana] + 1
     cuota_cursor = list(map(str, cuota_cursor))
     cuota_cursor = ''.join(cuota_cursor)
@@ -149,16 +142,9 @@ def sumar_una_multa(usuario=1, semana=1, nombre_b=''):
     cargar_datos_texto(nombre_b=nombre_b, usuario=usuario, tabla='socios', columna='multas', nuevo_valor=cuota_cursor)
 
 def pagar_una_multa(usuario=1, nombre_b=''):
-    base = sql.connect(nombre_b)
-    cursor = base.cursor()
-    instruc = f"SELECT multas FROM socios WHERE rowid = {usuario}"
-    cursor.execute(instruc)
-    multa_cursor = cursor.fetchall()[0][0]
-    base.commit()
-    base.close()
+    multa_cursor = [int(i) for i in leer_en_socios(usuario_n=usuario, columna='multas', nombre_b=nombre_b)]
 
     value = False
-    multa_cursor = list(map(int, multa_cursor))
 
     k = 0
     for i in multa_cursor:
@@ -168,7 +154,7 @@ def pagar_una_multa(usuario=1, nombre_b=''):
             break
         k += 1
     else:
-        tkm.showwarning('error', 'no hay multas por pagar')
+        tkm.showwarning('Error', 'No hay multas por pagar.')
 
     multa_cursor = list(map(str, multa_cursor))
     multa_cursor = ''.join(multa_cursor)
@@ -176,15 +162,22 @@ def pagar_una_multa(usuario=1, nombre_b=''):
     if value:
         cargar_datos_texto(nombre_b=nombre_b, usuario=usuario, tabla='socios', columna='multas', nuevo_valor=multa_cursor)
 
+def pagar_n_multas(usuario=0, n=0, nombre_b=''):
+    if n == 0 or n < 0 or usuario == 0:
+        pass
+    else:
+        for _ in range(n):
+            pagar_una_multa(usuario=usuario, nombre_b=nombre_b)
+
 def crear_y_cargar_el_calendario_general(fecha_inicial='', dobles=[], nombre_b=''):
     fechas = crear_listado_de_fechas(primera_fecha=fecha_inicial, dobles=dobles)
 
     if fechas == False:
-        tkm.showwarning('error', 'faltan datos o las fechas\ndobles no son validas')
+        tkm.showwarning('Error', 'Faltan datos o las fechas\ndobles no son validas.')
     else:
         s_fechas = '-'.join(fechas)
         cargar_datos_texto(nombre_b=nombre_b, usuario=6, tabla='ajustes', columna='valor', nuevo_valor=s_fechas)
-        tkm.showinfo('info', 'el calendario ha sido creado')
+        tkm.showinfo('Info', 'El calendario ha sido creado')
 
 def string_calendario_usuario(usuario=0, nombre_b=''):
     calendario = leer_ajuste_n(ajuste_n=6, nombre_b=nombre_b).split('-')
@@ -252,15 +245,15 @@ def rectificar_nombre(nombre):
 
 def titulo_de_usuario(usuario=0, nombre_b=''):
     if usuario == 0:
-        s = '№0   usuario aun no identificado          №puestos: x'
+        s = '№0   Usuario aun no identificado          №Puestos: x'
         return s
     else:
         nombre = leer_en_socios(usuario_n=usuario, columna='nombre', nombre_b=nombre_b)
         p = leer_en_socios(usuario_n=usuario, columna='puestos', nombre_b=nombre_b)
-        s = f'№{usuario}   {rectificar_nombre(nombre)}          №puestos: {p}'
+        s = f'№{usuario}   {rectificar_nombre(nombre)}          №Puestos: {p}'
         return s
     
-def arreglar_asuntos(usuario=1, nombre_b=''):
+def arreglar_asuntos(usuario=1, nombre_b='', cobrar_multas=True):
     calendario = leer_ajuste_n(ajuste_n=6, nombre_b=nombre_b).split('-')
     calendario = list(map(lambda x: list(map(lambda k: int(k), x.split('/'))), calendario))
     calendario = list(map(lambda x: datetime.datetime(*x), calendario))
@@ -277,7 +270,9 @@ def arreglar_asuntos(usuario=1, nombre_b=''):
                 if cuotas[i] == 'p':
                     pass
                 else:
-                    sumar_una_multa(usuario=usuario, semana=i, nombre_b=nombre_b)
+                    if cobrar_multas:
+                        sumar_una_multa(usuario=usuario, semana=i, nombre_b=nombre_b)
+                        
                     k = leer_en_socios(usuario_n=usuario, columna='cuotas', nombre_b=nombre_b)
                     k = modificar_string(k, i, 'd')
                     cargar_datos_texto(nombre_b=nombre_b, usuario=usuario, tabla='socios', columna='cuotas', nuevo_valor=k)
@@ -289,7 +284,7 @@ def mostrar_multas(usuario=0, nombre_b=''):
     if usuario == 0:
         return '_____ MULTAS _____\nno hay multas'
     calendario = leer_ajuste_n(ajuste_n=6, nombre_b=nombre_b).split('-')
-    multas = multas = [int(i) for i in leer_en_socios(usuario_n=usuario, columna='multas', nombre_b=nombre_b)]
+    multas = [int(i) for i in leer_en_socios(usuario_n=usuario, columna='multas', nombre_b=nombre_b)]
     multa = int(leer_ajuste_n(ajuste_n=2, nombre_b=nombre_b))
     puestos = leer_en_socios(usuario_n=usuario, columna='puestos', nombre_b=nombre_b)
     total = 0
@@ -306,9 +301,59 @@ def mostrar_multas(usuario=0, nombre_b=''):
         s += f'\nTOTAL: {total}'
     return s
 
+def contar_numero_de_multas(usuario=0, nombre_b=''):
+    if usuario == 0:
+        return [0]
+    multas = [int(i) for i in leer_en_socios(usuario_n=usuario, columna='multas', nombre_b=nombre_b)]
+    k = sum(multas)
+    if k == 0:
+        return [0]
+    else:
+        return list(range(1, k+1))
+    
+def contar_numero_de_cuotas(usuario=0, nombre_b=''):
+    if usuario == 0:
+        return [0]
+    cuotas = [i for i in leer_en_socios(usuario_n=usuario, columna='cuotas', nombre_b=nombre_b) if i != 'p']
+    n_cuotas = len(cuotas)
+    if n_cuotas > 10:
+        return [1,2,3,4,5,6,7,8,9,10]
+    elif n_cuotas == 0:
+        return[0]
+    else:
+        return list(range(1, n_cuotas+1))
+
+def sumar_a_multas(usuario_n=0, nombre_b='', valor_s=0):
+    if usuario_n == 0:
+        return None
+    multas_actual = leer_en_socios(usuario_n=usuario_n, columna='multas_global', nombre_b=nombre_b)
+    new_multas = multas_actual + valor_s
+    cargar_datos_numeros(nombre_b=nombre_b, usuario=usuario_n, tabla='socios', columna='multas_global', nuevo_valor=new_multas)
+
+def sumar_a_capital(usuario_n=0, nombre_b='', valor_s=0):
+    if usuario_n == 0:
+        return None
+    capiatl_actual = leer_en_socios(usuario_n=usuario_n, columna='capital', nombre_b=nombre_b)
+    new_capiatal = capiatl_actual + valor_s
+    cargar_datos_numeros(nombre_b=nombre_b, usuario=usuario_n, tabla='socios', columna='capital', nuevo_valor=new_capiatal)
+
+def corregir_numero_miles(n):
+    n = str(n)
+    n = n[::-1]
+    new_n = ''
+    k = 1
+    for i in n:
+        new_n += i
+        if k%3 == 0:
+            new_n += ','
+        k += 1
+    new_n = new_n[::-1]
+    if new_n[0] == ',':
+        new_n = new_n[1:]
+    return new_n
+
 #fechas_dobles = ['2024/10/14/19', '2024/11/11/19']
 #crear_y_cargar_el_calendario_general(fecha_inicial='2024/01/01/19', dobles=fechas_dobles, nombre_b='FONDO_1_2024.db')
 
 if __name__ == '__main__':
-    pass
-    #pagar_n_cuotas(usuario=1, n=10, nombre_b='FONDO_1_2024.db', tesorero='1')
+    insertar_socio(nombre='josEfa cataño', puestos=5, nombre_b='FONDO_1_2024.db')
